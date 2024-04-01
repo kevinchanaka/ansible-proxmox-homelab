@@ -1,4 +1,9 @@
 ---
+- name: Copy DNS configuration
+  ansible.builtin.copy:
+    src: resolv.conf
+    dest: /etc/resolv.conf
+
 - name: Copy script to machine
   ansible.builtin.copy:
     src: boot.sh
