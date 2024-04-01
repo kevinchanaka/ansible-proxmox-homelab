@@ -1,0 +1,4 @@
+- name: Bootstrap Proxmox node
+  hosts: "{{ groups.proxmox[0] }}"
+  roles:
+  - role: setup-node

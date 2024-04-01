@@ -1,0 +1,19 @@
+- name: Download image from URL and lists available images
+  hosts: "{{ groups.proxmox[0] }}"
+
+  tasks:
+  - name: Download image
+    ansible.builtin.get_url:
+      url: "{{ image_url }}"
+      dest: /var/lib/vz/template/iso
+    when: image_url | length > 0
+
+  - name: List available images
+    ansible.builtin.command:
+      cmd: ls -1 /var/lib/vz/template/iso
+    changed_when: false
+    register: images
+  
+  - name: Print available images
+    debug:
+      var: images.stdout

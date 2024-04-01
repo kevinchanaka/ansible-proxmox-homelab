@@ -1,0 +1,15 @@
+- name: Create VMs
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+  - name: Get Proxmox node
+    ansible.builtin.include_role:
+      name: get-node
+
+  - name: Create VM
+    ansible.builtin.include_role:
+      name: create-vm
+    vars: 
+      vm: "{{ item }}"
+    loop: "{{ vms }}"

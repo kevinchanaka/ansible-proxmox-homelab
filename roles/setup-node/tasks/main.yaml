@@ -1,0 +1,32 @@
+---
+- name: Copy script to machine
+  ansible.builtin.copy:
+    src: boot.sh
+    dest: /root/boot.sh
+    mode: "0755"
+
+- name: Setup cron job
+  ansible.builtin.cron:
+    name: "Boot script"
+    special_time: reboot
+    job: "/root/boot.sh"
+
+- name: Retrieve apt repositories
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns: '*.list'
+    recurse: yes
+  register: apt_repos
+
+- name: Comment out enterprise repositories
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: ^(deb .*enterprise\.proxmox\.com.*)
+    replace: '# \1'
+  with_items: "{{ apt_repos.files }}"
+
+- name: Add proxmox non-enterprise repository, not recommended for production
+  ansible.builtin.apt_repository:
+    repo: deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
+    state: present
+

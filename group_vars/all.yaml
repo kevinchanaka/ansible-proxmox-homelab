@@ -1,0 +1,17 @@
+# Proxmox environment details, do not change
+proxmox:
+  username: "{{ lookup('env', 'PROXMOX_USERNAME') }}"
+  password: "{{ lookup('env', 'PROXMOX_PASSWORD') }}"
+  host: "{{ groups.proxmox[0] }}"
+
+# Define VMs below, refer to README for more information
+vms:
+  - name: test
+    id: 200
+    template_id: 900
+    user: ubuntu
+    disk_size: 20G
+    cpu: 2
+    memory: 2048
+    ip: 192.168.0.30/24
+    gateway: 192.168.0.1

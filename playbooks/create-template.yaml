@@ -1,0 +1,42 @@
+# Refer to link for more info - https://pve.proxmox.com/wiki/Cloud-Init_Support
+- name: Create VM template
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+  - name: Get Proxmox node
+    ansible.builtin.include_role:
+      name: get-node
+
+  - name: Create VM using image 
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox.username }}"
+      api_password: "{{ proxmox.password }}"
+      api_host: "{{ proxmox.host }}"
+      node: "{{ proxmox_node }}"
+      name: "{{ vm_name }}"
+      vmid: "{{ vm_id }}"
+      memory: 2048
+      cores: 2
+      state: present
+      boot: order=scsi0
+      net:
+        net0: virtio,bridge=vmbr0
+      scsihw: virtio-scsi-pci
+      scsi:
+        scsi0: local-lvm:0,import-from=/var/lib/vz/template/iso/{{ image }}
+      ide:
+        ide2: local-lvm:cloudinit
+      serial:
+        serial0: socket
+      vga: serial0
+
+  - name: Convert VM to template
+    community.general.proxmox_kvm:
+      api_user: "{{ proxmox.username }}"
+      api_password: "{{ proxmox.password }}"
+      api_host: "{{ proxmox.host }}"
+      node: "{{ proxmox_node }}"
+      name: "{{ vm_name }}"
+      vmid: "{{ vm_id }}"
+      state: template

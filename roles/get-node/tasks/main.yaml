@@ -1,0 +1,11 @@
+---
+- name: Get node information
+  community.general.proxmox_node_info:
+    api_user: "{{ proxmox.username }}"
+    api_password: "{{ proxmox.password }}"
+    api_host: "{{ proxmox.host }}"
+  register: proxmox_nodes
+
+- name: Set fact for proxmox node name
+  ansible.builtin.set_fact:
+    proxmox_node: "{{ proxmox_nodes['proxmox_nodes'] | sort(attribute='node') | first | json_query('node') }}"

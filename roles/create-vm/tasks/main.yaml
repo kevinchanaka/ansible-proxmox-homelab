@@ -1,0 +1,41 @@
+---
+- name: Create VM using template
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.username }}"
+    api_password: "{{ proxmox.password }}"
+    api_host: "{{ proxmox.host }}"
+    node: "{{ vm.node | default(proxmox_node) }}"
+    name: "{{ vm.name }}"
+    vmid: "{{ vm.template_id }}"
+    newid: "{{ vm.id }}"
+    clone: yes
+    full: yes
+
+- name: Update VM configuration
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox.username }}"
+    api_password: "{{ proxmox.password }}"
+    api_host: "{{ proxmox.host }}"
+    node: "{{ vm.node | default(proxmox_node) }}"
+    name: "{{ vm.name }}"
+    vmid: "{{ vm.id }}"
+    update: yes
+    memory: "{{ vm.memory }}"
+    cores: "{{ vm.cpu }}"
+    ciuser: "{{ vm.user }}"
+    sshkeys: "{{ lookup('file', vm.ssh_key_file | default('~/.ssh/id_rsa.pub')) }}"
+    net:
+      net0: 'virtio,bridge=vmbr0'
+    ipconfig:
+      ipconfig0: 'ip={{ vm.ip }},gw={{ vm.gateway }}'
+    state: present
+
+- name: Resize disk
+  community.general.proxmox_disk:
+    api_user: "{{ proxmox.username }}"
+    api_password: "{{ proxmox.password }}"
+    api_host: "{{ proxmox.host }}"
+    vmid: "{{ vm.id }}"
+    disk: scsi0
+    size: "{{ vm.disk_size }}"
+    state: resized
